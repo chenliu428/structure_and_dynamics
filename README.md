@@ -1,4 +1,4 @@
-# Structure and Dynamics in Glasses -- A machine learning approach 
+# Structure and Dynamics in Glasses - a Machine Learning approach 
 
 **Investigation of relevant ones among many types of structure descriptors for determining the mobility of particles in a supercooled liquid** using supervised machine learning techniques.
 
