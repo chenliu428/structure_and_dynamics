@@ -1,16 +1,27 @@
-from numpy import *
-from pylab import *
-from scipy import *
-import numpy as np
-import scipy as scp
 import math as ma
-import matplotlib.cm as cm
+import numpy as np
+from numpy import copy
+from numpy import where
+from numpy import *
+
 import matplotlib.pyplot as plt
+from matplotlib import rc, rcParams
+from mpl_toolkits.mplot3d import Axes3D
+import matplotlib.mlab as mlab
+import matplotlib.ticker as ticker
+import matplotlib.cm as cm
+from matplotlib.colors import Normalize
+
+from scipy import *
+from scipy import fftpack as ftp
+from scipy.optimize import curve_fit, leastsq
+from scipy import interpolate as interplt
+from scipy.interpolate import interp1d
+
 import sys
+from datetime import datetime
 import os.path
 import imp
-import json
-from scipy.optimize import curve_fit
 
 import sklearn.cluster as skcltr
 import sklearn.linear_model as skl_linear
@@ -327,7 +338,7 @@ def Plot_LinearRegressionResult_FromFile():
     
     ## Plots the Weights to compare ##
     # - prepare the figure structure - #
-    Fig, Axes = subplots(3,3, sharex=True, figsize=(18,6))
+    Fig, Axes = plt.subplots(3,3, sharex=True, figsize=(18,6))
     Axs={}
     for i in range(len(dataset_names)):
         dname_key = dataset_names[i]

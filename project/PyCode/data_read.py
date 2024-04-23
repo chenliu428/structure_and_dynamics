@@ -1,24 +1,23 @@
 import math as ma
+import numpy as np
+import matplotlib.pyplot as plt
 from numpy import *
-from pylab import *
 from scipy import *
-import os.path
+
 from matplotlib import rc, rcParams
 from mpl_toolkits.mplot3d import Axes3D
 import matplotlib.mlab as mlab
+import matplotlib.ticker as ticker
+import matplotlib.cm as cm
 
 from scipy import fftpack as ftp
-
-from scipy import *
 from scipy.optimize import curve_fit, leastsq
-
 from scipy import interpolate as interplt
 from scipy.interpolate import interp1d
+
 import sys
 from datetime import datetime
 import os.path
-import matplotlib.ticker as ticker
-import matplotlib.cm as cm
 import imp
 
 ### file reading function
@@ -66,7 +65,7 @@ def load_data(full_file_path, plot_mobility_map=bool, std_cut=1e-4):
     Num_Particles = len(X_coor)
     Num_Features = len(Features[0,:])
 
-    Normalized_Features = np.zeros(shape=shape(Features))
+    Normalized_Features = np.zeros(shape=np.shape(Features))
     Std_of_features = []
     Mean_of_features = []
     Zero_std_features=[]

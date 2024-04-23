@@ -1,25 +1,24 @@
 import math as ma
+import numpy as np
 from numpy import *
-from pylab import *
-from scipy import *
-import os.path
+
+import matplotlib.pyplot as plt
 from matplotlib import rc, rcParams
 from mpl_toolkits.mplot3d import Axes3D
 import matplotlib.mlab as mlab
+import matplotlib.ticker as ticker
+import matplotlib.cm as cm
 from matplotlib.colors import Normalize
 
-from scipy import fftpack as ftp
-
 from scipy import *
+from scipy import fftpack as ftp
 from scipy.optimize import curve_fit, leastsq
-
 from scipy import interpolate as interplt
 from scipy.interpolate import interp1d
+
 import sys
 from datetime import datetime
 import os.path
-import matplotlib.ticker as ticker
-import matplotlib.cm as cm
 import imp
 
 import sklearn.cluster as skcltr
@@ -66,7 +65,7 @@ def main_propensity_map(Cnf_name:str='Cnf2.xy', draw_cluster:bool=False):
     X_input = np.array([x_new, y_new, m_new]).T
 
     AggCluster.fit(X_input)
-    clusters = copy(AggCluster.labels_)
+    clusters = np.copy(AggCluster.labels_)
     labels = np.unique(clusters)
     most_populated_label = labels[0]
     most_population = 0
@@ -100,7 +99,7 @@ def main_propensity_map(Cnf_name:str='Cnf2.xy', draw_cluster:bool=False):
 
     fig_m.colorbar(plt.cm.ScalarMappable(norm=Normalize(np.min(Mblty), np.max(Mblty)), cmap=clrmap), ax=ax_m, label="Propensity")
 
-    mb_sort = copy(avMblty_of_Labels)
+    mb_sort = np.copy(avMblty_of_Labels)
     mb_sort.sort()
     lb_sort = []
     for item in mb_sort:
