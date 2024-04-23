@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 import collections
 import sys
 import os.path
-import imp
+import importlib as imp
 import json
 from scipy.optimize import curve_fit
 
