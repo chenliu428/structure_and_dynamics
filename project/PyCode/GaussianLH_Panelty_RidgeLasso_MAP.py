@@ -21,6 +21,7 @@ import sys
 from datetime import datetime
 import os.path
 import importlib as imp
+import argparse
 import sklearn.cluster as skcltr
 import sklearn.linear_model as skl_linear
 
@@ -330,9 +331,24 @@ if __name__ == "__main__":
     print('GaussianLH_Panelty_RidgeLasso_MAP.py')
     # sys.exit()
 
-    main_MAP_RidgeLassoDebias_SaveToFile('Cnf2.xy')
-    # sys.exit()
+    parser = argparse.ArgumentParser(
+        description="Run script with an optional argument \"mode\" taking either 't' (for training and saving results) or 'p' (for reading results and ploting). For example \"run script.py --mode='p' \" "
+    )
+    parser.add_argument("--mode", type=str, default='p')
+    args = parser.parse_args()
+    run_mode = args.mode
 
-    # main_ReadResults_and_Plot('Cnf2.xy')
-    # sys.exit()
+    if run_mode=='t':
+    
+        ### do the training & save results to file ###
+        main_MAP_RidgeLassoDebias_SaveToFile('Cnf2.xy')
+        # sys.exit()
+    
+    elif run_mode=='p':
 
+        ### read the trained results & plot ###
+        Plots = main_ReadResults_and_Plot('Cnf2.xy')
+        # sys.exit()
+    
+    else:
+        print('Wrong mode value, mode is a string takes either \'t\' or \'p\' ! ')

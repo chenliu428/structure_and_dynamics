@@ -163,7 +163,7 @@ def K_related_UnNormalised(ElementaryQuantities, tilde_lambda, print_info: bool=
         plt.colorbar(im2, ax=ax2)
 
     # print('det 1 : ')
-    det_K = np.linalg.det(K_Mtrx)
+    det_K = 1 #np.linalg.det(K_Mtrx)
 
     log_Knorm = 0
     for i in range(M):
