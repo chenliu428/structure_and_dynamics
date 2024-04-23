@@ -28,8 +28,8 @@ imp.reload(dr)
 
 def main_propensity_map(Cnf_name:str='Cnf2.xy', draw_cluster:bool=False):
 
-    home_path = '' #'/Users/chenliu/'
-    project_path = './' #'Research_Projects/SVM-SwapMC'
+    home_path = '' 
+    project_path = './' 
     training_data_path = 'DATA/Training_data'
     training_data_file = Cnf_name
 
