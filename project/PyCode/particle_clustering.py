@@ -19,7 +19,7 @@ from scipy.interpolate import interp1d
 import sys
 from datetime import datetime
 import os.path
-import imp
+import importlib as imp
 
 import sklearn.cluster as skcltr
 
