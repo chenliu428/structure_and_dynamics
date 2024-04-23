@@ -20,7 +20,7 @@ from scipy.interpolate import interp1d
 import sys
 from datetime import datetime
 import os.path
-import imp
+import importlib as imp
 import sklearn.cluster as skcltr
 import sklearn.linear_model as skl_linear
 
@@ -243,8 +243,8 @@ def main_MAP_RidgeLassoDebias(cnf_name:str):
     }
 
     ### Data Loading & pre-Processing ###
-    home_path = '/Users/chenliu/'
-    project_path = 'Research_Projects/SVM-SwapMC'
+    home_path = ''
+    project_path = './'
     training_data_path = 'DATA/Training_data'
     training_data_file = cnf_name # 'Cnf1.xy'
     full_data_path = os.path.join(home_path, project_path, training_data_path, training_data_file)
