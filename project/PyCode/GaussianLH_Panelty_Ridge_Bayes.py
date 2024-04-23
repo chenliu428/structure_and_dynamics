@@ -21,7 +21,7 @@ from scipy.interpolate import interp1d
 import sys
 from datetime import datetime
 import os.path
-import imp
+import importlib as imp
 
 import sklearn.cluster as skcltr
 import sklearn.linear_model as skl_linear
@@ -576,17 +576,17 @@ def main_testing_GroundTruthSinX():
 
     # sys.exit()
 
-def main_FullyFunctional_BayesianRidge(): # !! be causcious, may overwrite file, commend out the saving code to avoid overwritting !! 
+def main_FullyFunctional_BayesianRidge(Cnf_name:str='Cnf2.xy'): # !! be causcious, may overwrite file, commend out the saving code to avoid overwritting !! 
     pass 
 
     ### Global Parameters ###
     data_std_cut = 1e-4 # for neglecting non-varying components in feature data - dr.load_data(..., std_cut=data_std_cut, ...) 
 
     ### Data Loading & pre-Processing ###
-    home_path = '/Users/chenliu/'
-    project_path = 'Research_Projects/SVM-SwapMC'
+    home_path = ''
+    project_path = './'
     training_data_path = 'DATA/Training_data'
-    training_data_file = 'Cnf3.xy'
+    training_data_file = Cnf_name
     full_data_path = os.path.join(home_path, project_path, training_data_path, training_data_file)
 
     Ext = dr.DataLoad_and_preProcessing(full_data_path, std_cut=data_std_cut)
@@ -639,7 +639,7 @@ def main_FullyFunctional_BayesianRidge(): # !! be causcious, may overwrite file,
 
     ### Save results to file ###
     R_save = {'feature names': feature_names, 'result_all_data': R_Ridge_WithAllData, 'result_trials': R_Trials_Ridge}
-    # dr.save_to_file_a_dictrionary('./DATA/Results_data/'+training_data_file+'_Bayes_ridge_Dict', R_save)
+    dr.save_to_file_a_dictrionary('./DATA/Results_data/'+training_data_file+'_Bayes_ridge_Dict', R_save)
 
     # sys.exit()
     ### Plot Bayes Ridge ###
@@ -730,9 +730,9 @@ def main_FullyFunctional_BayesianRidge(): # !! be causcious, may overwrite file,
 if __name__ == '__main__':
     
     print('GaussianLH_Penalty_Ridge_Bayes.py')
-    sys.exit()
+    # sys.exit()
 
-    main_FullyFunctional_BayesianRidge()
+    main_FullyFunctional_BayesianRidge('Cnf2.xy')
     sys.exit()
 
     # main_testing_GroundTruthSinX()

@@ -34,6 +34,7 @@ def main_propensity_map(Cnf_name:str='Cnf2.xy', draw_cluster:bool=False):
     training_data_file = Cnf_name
 
     full_data_path = os.path.join(home_path, project_path, training_data_path, training_data_file)
+    print(full_data_path)
 
     all_data = dr.load_data(full_data_path, plot_mobility_map=0)
 

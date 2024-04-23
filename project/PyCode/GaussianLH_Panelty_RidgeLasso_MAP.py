@@ -328,11 +328,11 @@ def main_ReadResults_and_Plot(Cnf_name:str, methods:list=['ridge', 'lasso', 'deb
 if __name__ == "__main__":
     
     print('GaussianLH_Panelty_RidgeLasso_MAP.py')
-    #sys.exit()
-
-    # main_MAP_RidgeLassoDebias_SaveToFile('Cnf2.xy')
     # sys.exit()
 
-    main_ReadResults_and_Plot('Cnf2.xy')
-    sys.exit()
+    main_MAP_RidgeLassoDebias_SaveToFile('Cnf2.xy')
+    # sys.exit()
+
+    # main_ReadResults_and_Plot('Cnf2.xy')
+    # sys.exit()
 
