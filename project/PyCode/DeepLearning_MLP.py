@@ -27,6 +27,7 @@ import data_read as dr
 import data_prep_crossvalid as dxv
 import plot_tools
 import GaussianLH_Panelty_RidgeLasso_MAP as glh_map
+import DeepLearning_Functionalities as dlf
 
 imp.reload(dr)
 imp.reload(dxv)
@@ -56,103 +57,19 @@ def animation_yvsy(Y_progress, Out_epochs, TrueTargets, sampling_period, pause_t
         plt.pause(pause_time)
         plt.clf()
 
-def person_coeffcicient(X:np.ndarray, Y:np.ndarray):
+def pearson_coeffcicient(X:np.ndarray, Y:np.ndarray):
     X_bar = np.mean(X)
     Y_bar = np.mean(Y)
     XY_bar = np.mean(X*Y)
     return (XY_bar-X_bar*Y_bar)/(np.std(X)*np.std(Y))
 
-def clone_state_dict_from(X):
-    return collections.OrderedDict(
-        [(key, tensor.clone().detach()) for key, tensor in X.state_dict().items()]
-    )
-
-class myDataset_from_tensors(Dataset):
-    def __init__(self, x, y):
-        super().__init__()
-        self.f = x
-        self.t = y
-    def __len__(self):
-        return len(self.f)
-    def __getitem__(self, idx):
-        sample = (self.f[idx], self.t[idx])
-        return sample
-
-class NeuralNet_MLP_Arch(nn.Module):
-    def __init__(self, arch:list, act_fn = nn.LeakyReLU(negative_slope=0.1)):
-        super(NeuralNet_MLP_Arch, self).__init__()
-        if len(arch)<3:
-            print('architecture wrong')
-            sys.exit()
-        self.architecture = arch
-        self.activation = act_fn
-        self.num_tot_layers = len(arch)
-        self.num_tot_passages = len(arch)-1
-        self.passage_struct = []
-        intrmdt_idx = 0
-        for i in range(len(arch)-1):
-            if i == 0:
-                # code = 'self.in_lyr = nn.Linear({0:d},{1:d}, dtype=torch.float64)'.format(arch[i], arch[i+1])
-                lname = 'in_lyr'
-                self._modules[lname] = nn.Linear(arch[i], arch[i+1], dtype=torch.float64)
-                self.passage_struct.append(lname)
-            elif i == len(arch)-2:
-                # code = 'self.out_lyr = nn.Linear({0:d},{1:d}, dtype=torch.float64)'.format(arch[i], arch[i+1])
-                lname = 'out_lyr'
-                self._modules[lname] = nn.Linear(arch[i], arch[i+1], dtype=torch.float64)
-                self.passage_struct.append(lname)
-            else:
-                # code = 'self.h{0:d} = nn.Linear({1:d},{2:d}, dtype=torch.float64)'.format(intrmdt_idx, arch[i], arch[i+1])
-                lname = 'h{0:d}'.format(intrmdt_idx)
-                self._modules[lname] = nn.Linear(arch[i], arch[i+1], dtype=torch.float64)
-                intrmdt_idx = intrmdt_idx+1
-                self.passage_struct.append(lname)
-            # exec(code)
-        
-        self.num_intrmdt_passages = intrmdt_idx
-
-    def forward(self, X):
-        for i, lname in enumerate(self.passage_struct):
-            if i == 0:
-                out = self._modules[lname](X)
-                out = self.activation(out)
-            elif i == self.num_tot_passages-1:
-                out = self._modules[lname](out)
-            else:
-                out = self._modules[lname](out)
-                out = self.activation(out)
-        return out
-
-    def get_ave_grad(self):
-        with torch.no_grad():
-            num_list = []
-            mean_list = []
-            for i, lname in enumerate(self.passage_struct):
-                for key in self._modules[lname]._parameters.keys():
-                    mean_list.append(self._modules[lname]._parameters[key].detach().abs().mean())
-                    num_elements = 1
-                    for number in self._modules[lname]._parameters[key].shape:
-                        num_elements = num_elements*number
-                    num_list.append(num_elements)
-            num_list = np.array(num_list)
-            mean_list = np.array(mean_list)
-
-            return np.sum(mean_list*num_list)/np.sum(num_list)
-
-    def rand_refresh(self):
-        for key in self.state_dict().keys():
-            nn.init.uniform_(self.state_dict()[key], -1.0, 1.0)
-
-    def dump_state_dict(self):
-        return clone_state_dict_from(self)
-
 def Train_MLP_Arch(
-        mymlp:NeuralNet_MLP_Arch, 
+        mymlp:dlf.NeuralNet_MLP_Arch, 
         loss, 
         nnOptmzr, 
         lr, 
-        train_dset:myDataset_from_tensors, 
-        valid_dset:myDataset_from_tensors, 
+        train_dset:dlf.myDataset_from_tensors, 
+        valid_dset:dlf.myDataset_from_tensors, 
         train_dloader, 
         valid_dloader, 
         mav_smpl_size:int = 300, 
@@ -261,8 +178,8 @@ def Train_MLP_Arch(
         stop_state = 'reach_wall '*(epoch>=num_epochs) + '& vld_saturation'*(epoch_lag_vld>=tol_lag) + f' epoch.{epoch:d}/{num_epochs:d}, lag.{epoch_lag_vld:d}/{tol_lag:d}!'
         print('stop_state: ', stop_state)
 
-        pearson_coef_train = person_coeffcicient(yrstore.detach().numpy(), train_dset[:][1].detach().numpy())
-        pearson_coef_valid = person_coeffcicient(yrstore_vld.detach().numpy(), valid_dset[:][1].detach().numpy())
+        pearson_coef_train = pearson_coeffcicient(yrstore.detach().numpy(), train_dset[:][1].detach().numpy())
+        pearson_coef_valid = pearson_coeffcicient(yrstore_vld.detach().numpy(), valid_dset[:][1].detach().numpy())
 
         Err_train = np.array(Err_train)
         Err_valid = np.array(Err_valid)
@@ -371,6 +288,70 @@ def Plot_MLP_PostTraining(mymlp, R_Mlp, train_dset, valid_dset, title_str='XX: '
         }
     }
 
+def Train_MLP_Arch_MultiDataSet(
+        mymlp:dlf.NeuralNet_MLP_Arch,
+        loss_func,
+        optmzr,
+        lr,
+        Data_Cluster_Tensor,
+        num_trial:int,
+        tol_lag_r = 0.3,
+        num_epochs:int=10000,
+        num_batch:int=10,
+        mv_avrg_size:int=300,
+        print_step :int=200,
+        plot_each:bool = True
+    ):
+
+    R_mlp_trials = []
+    for i in range(num_trial):
+        ftrs_train = Data_Cluster_Tensor[i]['fit']['feature']
+        trgs_train = Data_Cluster_Tensor[i]['fit']['target']
+        ftrs_valid = Data_Cluster_Tensor[i]['valid']['feature']
+        trgs_valid = Data_Cluster_Tensor[i]['valid']['target']
+
+        train_dset = dlf.myDataset_from_tensors(ftrs_train, trgs_train)
+        valid_dset = dlf.myDataset_from_tensors(ftrs_valid, trgs_valid)
+
+        train_dloader = DataLoader(train_dset, batch_size=int(len(train_dset)/num_batch), shuffle=1)
+        valid_dloader = DataLoader(valid_dset, batch_size=1)
+
+        mymlp.rand_refresh()
+        R_Mlp = Train_MLP_Arch(
+            mymlp=mymlp,
+            loss=loss_func,
+            nnOptmzr=optmzr,
+            lr=lr,
+            train_dset=train_dset,
+            valid_dset=valid_dset,
+            train_dloader=train_dloader,
+            valid_dloader=valid_dloader,
+            tol_lag_r=tol_lag_r,
+            print_step=print_step,
+            mav_smpl_size=mv_avrg_size,
+            num_epochs=num_epochs
+        )
+
+        if plot_each:
+            Plot_MLP_PostTraining(mymlp, R_Mlp, train_dset, valid_dset, title_str=f'trial.{i:d}')
+
+        R_mlp_trials.append(R_Mlp)
+
+    Rdict={
+        'model': mymlp, 
+        'model_class': type(mymlp),
+        'av_valid_pearson': np.mean([item['pearson_valid'] for item in R_mlp_trials]),
+        'std_valid_pearson': np.std([item['pearson_valid'] for item in R_mlp_trials]),
+        'valid_slct_parameters': [item['valid_slct_parameters'] for item in R_mlp_trials],
+        'stop_state': [item['stop_state'] for item in R_mlp_trials],
+        'loss': loss_func,
+        'optimiser': optmzr,
+        'lr':lr,
+        'raw results': R_mlp_trials,
+    }
+
+    return Rdict
+
 def main_FullyFunctional_MLP(Cnf_name:str='Cnf2.xy'):
     pass
 
@@ -436,7 +417,7 @@ def main_FullyFunctional_MLP(Cnf_name:str='Cnf2.xy'):
         
     ### MLP ###
     arch = [M,2,10,10,1]
-    mymlp = NeuralNet_MLP_Arch(arch=arch)
+    mymlp = dlf.NeuralNet_MLP_Arch(arch=arch)
     lr = 5e-3
     loss_func = nn.MSELoss()
     optmzr = torch.optim.Adam
@@ -449,8 +430,8 @@ def main_FullyFunctional_MLP(Cnf_name:str='Cnf2.xy'):
         ftrs_valid = Data_Cluster_Tensor[i]['valid']['feature']
         trgs_valid = Data_Cluster_Tensor[i]['valid']['target']
 
-        train_dset = myDataset_from_tensors(ftrs_train, trgs_train)
-        valid_dset = myDataset_from_tensors(ftrs_valid, trgs_valid)
+        train_dset = dlf.myDataset_from_tensors(ftrs_train, trgs_train)
+        valid_dset = dlf.myDataset_from_tensors(ftrs_valid, trgs_valid)
 
         train_dloader = DataLoader(train_dset, batch_size=int(len(train_dset)/num_batch), shuffle=1)
         valid_dloader = DataLoader(valid_dset, batch_size=1)
@@ -476,8 +457,112 @@ def main_FullyFunctional_MLP(Cnf_name:str='Cnf2.xy'):
     for i, Ritem in enumerate(R_mlp_trials):
         print(f"Trial.{i:d}/{num_trial:d}, Valid_Err.{Ritem['valid_err']:.4E}, Train_Err.{Ritem['min_train_err']:.4E}, Pearson t/v: {Ritem['pearson_train']:.4E}/{Ritem['pearson_valid']:.4E}, Stop: {Ritem['stop_state']} .")
 
+def main_FullyFunctional_MLP_SaveToFile(post_in_arch:list, Cnf_name:str='Cnf2.xy'):
+    pass
+
+    ### Global Parameters ###
+    data_std_cut = 1e-4 # for neglecting non-varying components in feature data - dr.load_data(..., std_cut=data_std_cut, ...) 
+
+    ### Data Loading & pre-Processing ###
+    home_path = ''
+    project_path = './'
+    training_data_path = 'DATA/Training_data'
+    # Cnf_name='Cnf2.xy'
+    training_data_file = Cnf_name 
+    full_data_path = os.path.join(home_path, project_path, training_data_path, training_data_file)
+
+    Ext = dr.DataLoad_and_preProcessing(full_data_path, std_cut=data_std_cut)
+    N = Ext['total number of data points']
+    M = Ext['dimension of input feature vectors']
+    features = Ext['input features']
+    targets = Ext['output targets']
+    std_features = Ext['empirical standard deviation of features']
+    mean_features = Ext['empirical mean of features']
+    feature_names = Ext['feature names']
+
+    cross_validation_method = 'rand_cross'  #  'nest'   #   'segment' #    
+
+    parameter_crossvalidation = {
+        'validation_ratio' : 0.2, # its function depends on the opted cross-validation method. 
+
+        ## for Nest Cross Validation ##
+        'num_cell' : int(5), # number of cells in the "nest"
+
+        ## for Segmenting Cross Validation ##
+        'num_seg' : int(3), # number of segments apart from validation set
+
+        ## for Random Split Cross Validation ##
+        'num_split_ratio': 1.0,  # to generate number of trials : num_split_ratio/validation_ratio
+
+        ## Producibility of randomness ##
+        'rand_seed': 357828922 , 
+        'seeding_or_not': True,   # true for reproducible cross validation data structure using 'rand_seed'
+
+        ## Control Options ##
+        'print_info_or_not': True
+    }
+
+    ### Prepare Data for Cross Validation ###
+    num_trial, Data_Cluster = dxv.DataPreparation_for_CrossValidation(cross_validation_method, N, features, targets, parameter_crossvalidation)
+    
+    Data_Cluster_Tensor = []
+    for i, item in enumerate(Data_Cluster):
+        data_dict = {}
+        for ky1 in item.keys():
+            sub_dict = {}
+            sub_dict['feature'] = torch.tensor(item[ky1]['feature'])
+            sub_dict['target'] = torch.tensor([[val] for val in item[ky1]['target']])
+            data_dict[ky1] = sub_dict
+        Data_Cluster_Tensor.append(data_dict)
+
+    ### MLP training ###
+    # arch = [M,2,1]
+    arch = [n_lyr for n_lyr in post_in_arch]
+    arch.insert(0,M)
+    mymlp = dlf.NeuralNet_MLP_Arch(arch=arch)
+    lr = 5e-3
+    loss_func = nn.MSELoss()
+    optmzr = torch.optim.Adam
+
+    num_batch = 10
+
+    R_dict = Train_MLP_Arch_MultiDataSet(
+        mymlp=mymlp,
+        loss_func=loss_func,
+        optmzr=optmzr,
+        lr=lr,
+        Data_Cluster_Tensor=Data_Cluster_Tensor,
+        num_trial=num_trial,
+        tol_lag_r=0.3,
+        num_epochs=10000,
+        num_batch=num_batch,
+        mv_avrg_size=300,
+        print_step=500,
+        plot_each=True
+    )
+
+    ### print out training results ###
+    R_mlp_trials = R_dict['raw results']
+    for i, Ritem in enumerate(R_mlp_trials):
+        print(f"Trial.{i:d}/{num_trial:d}, Valid_Err.{Ritem['valid_err']:.4E}, Train_Err.{Ritem['min_train_err']:.4E}, Pearson t/v: {Ritem['pearson_train']:.4E}/{Ritem['pearson_valid']:.4E}, Stop: {Ritem['stop_state']} .")
+
+    ### save training results to file ###
+    R_dict_save = {}
+    for ky in R_dict.keys():
+        if ky!='raw results':
+            R_dict_save[ky] = R_dict[ky]
+    str_arch = 'Arch_In.'
+    for idx, n in enumerate(arch):
+        str_arch=str_arch+'-'*(idx!=0)+f'{n:d}'
+    dr.save_to_file_a_dictrionary('./DATA/Results_data/'+Cnf_name+'_Deep_'+str_arch+'_Dict', R_dict_save)
+
+
 if __name__ =='__main__':
-    print('Pytorch_study3.py')
+    print('DeepLearning_MLP.py')
     # sys.exit()
 
-    main_FullyFunctional_MLP()    
+    main_FullyFunctional_MLP_SaveToFile(post_in_arch=[2,1], Cnf_name='Cnf2.xy')
+    sys.exit()
+
+    # main_FullyFunctional_MLP()    
+    # sys.exit()
