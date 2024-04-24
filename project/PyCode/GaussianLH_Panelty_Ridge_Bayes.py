@@ -300,154 +300,154 @@ def Feature_Selection_Analysis():
         'ftrs_names': Ftrs_Names
     }
 
-def Plot_LinearRegressionResult_FromFile():
+# def Plot_LinearRegressionResult_FromFile():
     
-    dataset_names = ['Cnf1.xy', 'Cnf2.xy', 'Cnf3.xy']
-    methods = {
-        'MAP': ['ridge', 'lasso', 'debias'], 
-        'Bayes': ['ridge']
-    }
-    approaches = [item  for item in methods.keys()]
+#     dataset_names = ['Cnf1.xy', 'Cnf2.xy', 'Cnf3.xy']
+#     methods = {
+#         'MAP': ['ridge', 'lasso', 'debias'], 
+#         'Bayes': ['ridge']
+#     }
+#     approaches = [item  for item in methods.keys()]
 
-    Clrs={
-        'MAP': {'debias':'g', 'ridge':'b', 'lasso': 'r'},
-        'Bayes': {'ridge': 'm'}
-    }
-    Syms={
-        'MAP': {'debias':'s', 'ridge':'o', 'lasso': 'D'},
-        'Bayes': {'ridge': '^'}
-    }
-    Clrs_Sys={'Cnf1.xy':'b', 'Cnf2.xy':'r', 'Cnf3.xy':'g'}
-    Syms_Sys={'Cnf1.xy':'s', 'Cnf2.xy':'v', 'Cnf3.xy':'o'}
+#     Clrs={
+#         'MAP': {'debias':'g', 'ridge':'b', 'lasso': 'r'},
+#         'Bayes': {'ridge': 'm'}
+#     }
+#     Syms={
+#         'MAP': {'debias':'s', 'ridge':'o', 'lasso': 'D'},
+#         'Bayes': {'ridge': '^'}
+#     }
+#     Clrs_Sys={'Cnf1.xy':'b', 'Cnf2.xy':'r', 'Cnf3.xy':'g'}
+#     Syms_Sys={'Cnf1.xy':'s', 'Cnf2.xy':'v', 'Cnf3.xy':'o'}
 
-    ## Load the entire file saving linear regression results ##
-    path = './DATA/Results_data'
-    Files_names = {}
-    R_LinReg = {}
-    for dname in dataset_names:
-        Files_names[dname] = {}
-        R_LinReg[dname] = {}
-        for app in approaches:
-            Files_names[dname][app]={}
-            R_LinReg[dname][app]={}
-            for reg in methods[app]:
-                file_name = dname+'_'+app+'_'+reg+'_Dict'
-                R_dict = dr.read_a_dictionary_file(os.path.join(path, file_name))
-                Files_names[dname][app][reg] = file_name
-                R_LinReg[dname][app][reg] = R_dict
+#     ## Load the entire file saving linear regression results ##
+#     path = './DATA/Results_data'
+#     Files_names = {}
+#     R_LinReg = {}
+#     for dname in dataset_names:
+#         Files_names[dname] = {}
+#         R_LinReg[dname] = {}
+#         for app in approaches:
+#             Files_names[dname][app]={}
+#             R_LinReg[dname][app]={}
+#             for reg in methods[app]:
+#                 file_name = dname+'_'+app+'_'+reg+'_Dict'
+#                 R_dict = dr.read_a_dictionary_file(os.path.join(path, file_name))
+#                 Files_names[dname][app][reg] = file_name
+#                 R_LinReg[dname][app][reg] = R_dict
     
-    ## Plots the Weights to compare ##
-    # - prepare the figure structure - #
-    Fig, Axes = plt.subplots(3,3, sharex=True, figsize=(18,6))
-    Axs={}
-    for i in range(len(dataset_names)):
-        dname_key = dataset_names[i]
-        Axs[dname_key] = {}
-        Axs[dname_key].update({'MAP-Ridge-Lasso-Debias': Axes[0,i]})
-        Axs[dname_key].update({'Bayes-MAP-Ridge': Axes[1,i]})
-        Axs[dname_key].update({'Bayes-MAP-Ridge-Abs': Axes[2,i]})
-        Axes[0,i].set_title(dname_key,fontsize=14)
-        Axes[2,i].set_xlabel(r'Feature Index $\alpha$', fontsize=12)
-        if i==0:
-            Axes[0,i].set_ylabel(r'$w_\alpha$', fontsize=15, labelpad=10)
-            Axes[1,i].set_ylabel(r'$w_\alpha$', fontsize=15, labelpad=10)
-            Axes[2,i].set_ylabel(r'$|w_\alpha|$', fontsize=15, labelpad=10)
+#     ## Plots the Weights to compare ##
+#     # - prepare the figure structure - #
+#     Fig, Axes = plt.subplots(3,3, sharex=True, figsize=(18,6))
+#     Axs={}
+#     for i in range(len(dataset_names)):
+#         dname_key = dataset_names[i]
+#         Axs[dname_key] = {}
+#         Axs[dname_key].update({'MAP-Ridge-Lasso-Debias': Axes[0,i]})
+#         Axs[dname_key].update({'Bayes-MAP-Ridge': Axes[1,i]})
+#         Axs[dname_key].update({'Bayes-MAP-Ridge-Abs': Axes[2,i]})
+#         Axes[0,i].set_title(dname_key,fontsize=14)
+#         Axes[2,i].set_xlabel(r'Feature Index $\alpha$', fontsize=12)
+#         if i==0:
+#             Axes[0,i].set_ylabel(r'$w_\alpha$', fontsize=15, labelpad=10)
+#             Axes[1,i].set_ylabel(r'$w_\alpha$', fontsize=15, labelpad=10)
+#             Axes[2,i].set_ylabel(r'$|w_\alpha|$', fontsize=15, labelpad=10)
     
-    Fig_Apps = {}
-    Axs_Apps = {}
-    for ky1 in methods.keys():
-        for ky2 in methods[ky1]:
-            fg, ax = plt.subplots(1,1)
-            ax.set_title(ky1+'-'+ky2, fontsize=13)
-            ax.set_xlabel(r'Feature Index $\alpha$', fontsize=12)
-            ax.set_ylabel(r'$w_\alpha$', fontsize=15, labelpad=-10)
-            Fig_Apps[ky1+'-'+ky2] = fg
-            Axs_Apps[ky1+'-'+ky2] = ax
+#     Fig_Apps = {}
+#     Axs_Apps = {}
+#     for ky1 in methods.keys():
+#         for ky2 in methods[ky1]:
+#             fg, ax = plt.subplots(1,1)
+#             ax.set_title(ky1+'-'+ky2, fontsize=13)
+#             ax.set_xlabel(r'Feature Index $\alpha$', fontsize=12)
+#             ax.set_ylabel(r'$w_\alpha$', fontsize=15, labelpad=-10)
+#             Fig_Apps[ky1+'-'+ky2] = fg
+#             Axs_Apps[ky1+'-'+ky2] = ax
     
-    # - post treat of results & plot - #
-    lines=[]
-    handles=[]
-    for i in range(len(dataset_names)):
-        dname_key = dataset_names[i]
-        ax1 = Axs[dname_key]['MAP-Ridge-Lasso-Debias']
-        ax2 = Axs[dname_key]['Bayes-MAP-Ridge']
-        ax3 = Axs[dname_key]['Bayes-MAP-Ridge-Abs']
-        R_lr_MAP = R_LinReg[dname_key]['MAP']
-        R_lr_BYA = R_LinReg[dname_key]['Bayes']
-        full_features = R_lr_MAP['ridge']['feature names']
+#     # - post treat of results & plot - #
+#     lines=[]
+#     handles=[]
+#     for i in range(len(dataset_names)):
+#         dname_key = dataset_names[i]
+#         ax1 = Axs[dname_key]['MAP-Ridge-Lasso-Debias']
+#         ax2 = Axs[dname_key]['Bayes-MAP-Ridge']
+#         ax3 = Axs[dname_key]['Bayes-MAP-Ridge-Abs']
+#         R_lr_MAP = R_LinReg[dname_key]['MAP']
+#         R_lr_BYA = R_LinReg[dname_key]['Bayes']
+#         full_features = R_lr_MAP['ridge']['feature names']
 
-        ## MAP data prepration ##
-        Map_Opt_Indexs = {}
-        Map_Opt_Hypers = {}
-        Map_Opt_Ws = {}
-        Map_Err_Ws = {}
-        Map_Ftr_Idx = {}
-        for reg_key in methods['MAP']:
-            Ftrs = R_lr_MAP[reg_key]['feature names']
-            Rslt = R_lr_MAP[reg_key]['result']
-            Pnlt = Rslt['Panelty']
-            opt_idx = np.where(Rslt['Ave_Risk(panelty)']==np.min(Rslt['Ave_Risk(panelty)']))[0][0]            
-            Map_Opt_Indexs[reg_key] = opt_idx
-            Map_Opt_Hypers[reg_key] = Pnlt[opt_idx]
-            Map_Opt_Ws[reg_key] = Rslt['Ave_Ws(panelty)'][Pnlt[opt_idx]]
-            Map_Err_Ws[reg_key] = Rslt['Std_Ws(panelty)']['std'][opt_idx]
-            Map_Ftr_Idx[reg_key] = np.array([full_features.index(item) for item in Ftrs])
+#         ## MAP data prepration ##
+#         Map_Opt_Indexs = {}
+#         Map_Opt_Hypers = {}
+#         Map_Opt_Ws = {}
+#         Map_Err_Ws = {}
+#         Map_Ftr_Idx = {}
+#         for reg_key in methods['MAP']:
+#             Ftrs = R_lr_MAP[reg_key]['feature names']
+#             Rslt = R_lr_MAP[reg_key]['result']
+#             Pnlt = Rslt['Panelty']
+#             opt_idx = np.where(Rslt['Ave_Risk(panelty)']==np.min(Rslt['Ave_Risk(panelty)']))[0][0]            
+#             Map_Opt_Indexs[reg_key] = opt_idx
+#             Map_Opt_Hypers[reg_key] = Pnlt[opt_idx]
+#             Map_Opt_Ws[reg_key] = Rslt['Ave_Ws(panelty)'][Pnlt[opt_idx]]
+#             Map_Err_Ws[reg_key] = Rslt['Std_Ws(panelty)']['std'][opt_idx]
+#             Map_Ftr_Idx[reg_key] = np.array([full_features.index(item) for item in Ftrs])
 
-        ## Bayes data preparation ##
-        R_BYA_ridge = R_lr_BYA['ridge']['result_all_data']
-        Bya_Ftr_index = np.array([full_features.index(item) for item in  R_lr_BYA['ridge']['feature names']])
-        Bya_Ws = R_BYA_ridge['Ws']
-        eff_num_coef = int(R_BYA_ridge['Num Eff. Ft.'][R_BYA_ridge['the_opt_idx']]+1)
-        sort_ws = np.sort(np.abs(Bya_Ws))
-        eff_idx = where(np.abs(Bya_Ws)>=sort_ws[-eff_num_coef])[0]
-        eff_cof = np.array([ Bya_Ws[item] for item in eff_idx ])
+#         ## Bayes data preparation ##
+#         R_BYA_ridge = R_lr_BYA['ridge']['result_all_data']
+#         Bya_Ftr_index = np.array([full_features.index(item) for item in  R_lr_BYA['ridge']['feature names']])
+#         Bya_Ws = R_BYA_ridge['Ws']
+#         eff_num_coef = int(R_BYA_ridge['Num Eff. Ft.'][R_BYA_ridge['the_opt_idx']]+1)
+#         sort_ws = np.sort(np.abs(Bya_Ws))
+#         eff_idx = where(np.abs(Bya_Ws)>=sort_ws[-eff_num_coef])[0]
+#         eff_cof = np.array([ Bya_Ws[item] for item in eff_idx ])
 
-        ## plot ws MAP Ridge, Lasso, Debias ##
-        for xc in Map_Ftr_Idx['debias']:
-            ax1.plot([xc, xc], [-1,10], 'k--', lw=0.4)
-        ax1_ylim_min = 1e100
-        ax1_ylim_max = -1e100
-        for key in methods['MAP']:
-            lx1 = ax1.errorbar(Map_Ftr_Idx[key], Map_Opt_Ws[key], yerr=Map_Err_Ws[key], fmt=Syms['MAP'][key], mfc='none', elinewidth=1, capsize=4, color=Clrs['MAP'][key], label='MAP-'+key)
-            ax1_ylim_min = min(ax1_ylim_min, np.min(Map_Opt_Ws[key]))
-            ax1_ylim_max = max(ax1_ylim_max, np.max(Map_Opt_Ws[key]))
-            if i==0 :
-                lines.append(lx1)
-                handles.append('MAP-'+key)
-            Axs_Apps['MAP-'+key].errorbar(Map_Ftr_Idx[key], Map_Opt_Ws[key], yerr=Map_Err_Ws[key], fmt=Syms_Sys[dname_key], ms=7, mfc='none', elinewidth=1, capsize=4, color=Clrs_Sys[dname_key], label=dname_key)
-        ax1.set_ylim([1.1*ax1_ylim_min, 1.1*ax1_ylim_max])
+#         ## plot ws MAP Ridge, Lasso, Debias ##
+#         for xc in Map_Ftr_Idx['debias']:
+#             ax1.plot([xc, xc], [-1,10], 'k--', lw=0.4)
+#         ax1_ylim_min = 1e100
+#         ax1_ylim_max = -1e100
+#         for key in methods['MAP']:
+#             lx1 = ax1.errorbar(Map_Ftr_Idx[key], Map_Opt_Ws[key], yerr=Map_Err_Ws[key], fmt=Syms['MAP'][key], mfc='none', elinewidth=1, capsize=4, color=Clrs['MAP'][key], label='MAP-'+key)
+#             ax1_ylim_min = min(ax1_ylim_min, np.min(Map_Opt_Ws[key]))
+#             ax1_ylim_max = max(ax1_ylim_max, np.max(Map_Opt_Ws[key]))
+#             if i==0 :
+#                 lines.append(lx1)
+#                 handles.append('MAP-'+key)
+#             Axs_Apps['MAP-'+key].errorbar(Map_Ftr_Idx[key], Map_Opt_Ws[key], yerr=Map_Err_Ws[key], fmt=Syms_Sys[dname_key], ms=7, mfc='none', elinewidth=1, capsize=4, color=Clrs_Sys[dname_key], label=dname_key)
+#         ax1.set_ylim([1.1*ax1_ylim_min, 1.1*ax1_ylim_max])
 
-        ## plot ws MAP-Bayes Reidge ##
-        for xc in eff_idx:
-            ax2.plot([xc, xc], [-1,10], 'k--', lw=0.4)
-        key2 = 'ridge'
-        ax2.errorbar(Map_Ftr_Idx[key2], Map_Opt_Ws[key2], yerr=Map_Err_Ws[key2], fmt=Syms['MAP'][key2], mfc='none', elinewidth=1, capsize=4, color=Clrs['MAP'][key2], label='MAP-'+key2)
-        lbya = ax2.plot(Bya_Ftr_index, Bya_Ws, Syms['Bayes'][key2], mfc='none', color=Clrs['Bayes'][key2], label='Bayes-'+key2)
-        lbay_eff = ax2.plot(eff_idx, eff_cof, 'ks', ms=8, mfc='none', mew=1, label='Bayes Eff. Ftr.')
-        ax2.set_ylim([ 1.1*np.min(np.append(Bya_Ws, Map_Opt_Ws[key2])) , 1.1*np.max(np.append(Bya_Ws, Map_Opt_Ws[key2])) ])
-        Axs_Apps['Bayes-ridge'].plot(Bya_Ftr_index, Bya_Ws, Syms_Sys[dname_key], ms=7, mfc='none', color=Clrs_Sys[dname_key], label=dname_key)
+#         ## plot ws MAP-Bayes Reidge ##
+#         for xc in eff_idx:
+#             ax2.plot([xc, xc], [-1,10], 'k--', lw=0.4)
+#         key2 = 'ridge'
+#         ax2.errorbar(Map_Ftr_Idx[key2], Map_Opt_Ws[key2], yerr=Map_Err_Ws[key2], fmt=Syms['MAP'][key2], mfc='none', elinewidth=1, capsize=4, color=Clrs['MAP'][key2], label='MAP-'+key2)
+#         lbya = ax2.plot(Bya_Ftr_index, Bya_Ws, Syms['Bayes'][key2], mfc='none', color=Clrs['Bayes'][key2], label='Bayes-'+key2)
+#         lbay_eff = ax2.plot(eff_idx, eff_cof, 'ks', ms=8, mfc='none', mew=1, label='Bayes Eff. Ftr.')
+#         ax2.set_ylim([ 1.1*np.min(np.append(Bya_Ws, Map_Opt_Ws[key2])) , 1.1*np.max(np.append(Bya_Ws, Map_Opt_Ws[key2])) ])
+#         Axs_Apps['Bayes-ridge'].plot(Bya_Ftr_index, Bya_Ws, Syms_Sys[dname_key], ms=7, mfc='none', color=Clrs_Sys[dname_key], label=dname_key)
 
-        if i==0:
-            lines.append(lbya[0])
-            handles.append('Bayes-'+key2)
-            lines.append(lbay_eff[0])
-            handles.append('Bayes Eff. Ftr.')
+#         if i==0:
+#             lines.append(lbya[0])
+#             handles.append('Bayes-'+key2)
+#             lines.append(lbay_eff[0])
+#             handles.append('Bayes Eff. Ftr.')
         
-        ## plot |ws| MAP-Bayes Rdige
-        key3 = key2
-        ax3.plot(Map_Ftr_Idx[key3], np.abs(Map_Opt_Ws[key3]), Syms['MAP'][key3], mfc='none',  color=Clrs['MAP'][key3], label='MAP-'+key3)
-        ax3.plot(Bya_Ftr_index, np.abs(Bya_Ws), Syms['Bayes'][key3], mfc='none', color=Clrs['Bayes'][key3], label='Bayes-'+key3)
-        ax3.set_yscale('log')
+#         ## plot |ws| MAP-Bayes Rdige
+#         key3 = key2
+#         ax3.plot(Map_Ftr_Idx[key3], np.abs(Map_Opt_Ws[key3]), Syms['MAP'][key3], mfc='none',  color=Clrs['MAP'][key3], label='MAP-'+key3)
+#         ax3.plot(Bya_Ftr_index, np.abs(Bya_Ws), Syms['Bayes'][key3], mfc='none', color=Clrs['Bayes'][key3], label='Bayes-'+key3)
+#         ax3.set_yscale('log')
 
-    ## set legends ##
-    Fig.legend(lines, handles, loc='lower center')
-    for key in Axs_Apps.keys():
-        Axs_Apps[key].legend()
+#     ## set legends ##
+#     Fig.legend(lines, handles, loc='lower center')
+#     for key in Axs_Apps.keys():
+#         Axs_Apps[key].legend()
 
-    # print(lines)
-    # print(handles)
+#     # print(lines)
+#     # print(handles)
 
-    return Fig, Axs, lines, handles
+#     return Fig, Axs, lines, handles
 
 def main_testing_GroundTruthSinX():
     pass
