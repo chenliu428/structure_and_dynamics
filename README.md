@@ -41,6 +41,36 @@ For tuning hyper-parameters, a slight variation of the conventional cross valida
 
 ### Linear models
 
+#### A unified view
+
 A linear model for our problem reads
-$$\hat{p} = \mathbf{w} \cdot \mathbf{x} + w_0 \;.$$
-There are various approaches based on a linear model
+$$\hat{p} = \mathbf{w} \cdot \mathbf{x} + w_0 \quad .$$
+There are various approaches based on a linear model, such as empirical risk minimisation (ERM), maximum posterior (MAP) or Baysian inference.
+This project adopts a view in which different approaches can be regarded as variations of treatement of the same underlying probabilistic model, that is specified by a graphic representation.
+Adopting such an unified point of view has the advantage to compare across different treatments for the same dataset, and as such to assess the validation of treatments as well as the model assumption.
+This advantage does come with a price, which requires that the exponential of the negative loss function used in an ERM is normalisable with respect to target value. For example, the absolut distance $`|p_i-\hat{p}|`$ renders $`\int dp_i \exp(-|p_i-\hat{p}|)`$ normalisable.
+This constraint may hurt the application in some cases but not ours.
+
+#### Different treatments
+
+The probabilistic model considered here is simply given by a likelihood and a prior $` P_\text{lh.}(p|\mathbf{x};\mathbf{w}) \times P_\text{pr.}(\mathbf{w}|\theta) `$, and data points are considered (conditionally) independent from each other for a given $`\mathbf{w}`$.
+We will consider the standard Gaussian likelihood
+$$ P_\text{lh.} \propto \exp\left( -\frac{1}{2}\beta(p_i-\hat{p})^2 \right) $$
+which is equivalent to considering a summed square loss function. We will consider two types of prior on the feature weights $` \mathbf{w} `$, namely a $\ell_1$ norm and a $\ell_2$ norm, that is
+$$ P_\text{pr.} \propto \exp(-\lambda\ell_1(\mathbf{w})) \equiv \exp(-\lambda \sum_{\alpha}|w_\alpha| ) $$
+and
+$$ P_\text{pr.} \propto \exp(-\lambda\ell_2(\mathbf{w})) \equiv \exp(-\lambda \sum_{\alpha}w_\alpha^2 ) \quad .$$
+One easily sees that, with either prior choice, MAP and ERM (equiped with a $\ell_1$ or $\ell_2$ regularisation) become equivalent in this setting and the training results only depends on $` \tilde{\lambda}\equiv \lambda/\beta `$.
+Conventionally, it is called Lasso regression when appplying MAP with a $\ell_1$ regularisation and Ridge regression when applying MAP with a $\ell_2$ regularisation. 
+We will call them "MAP-Ridge" and "MAP-Lasso" to be distinguished from Bayesian treatment of the same probabilistic models, which will be called "Bayes-Ridge" for example.
+"Bayes-Lasso" is not studied here, because of the numerical integration challenges raised by our particular dataset.
+In Bayes-Ridge, hyper-parameters ($\beta$ and $\lambda$) are determined by maximising the marginal likelihood (also called "model evidence"), in which, after short manipulation, the training results can also be considered to only depend on $\tilde{\lambda}$.
+
+MAP-Lasso is known for its sparsity in training results, which is particularly useful for selecting relevant features, such as one of the core purposes of this project. It is however also known for its tendency to over reduce the amplitude of the selected weights. To address this issue, we introduces also the debias treatment, called "MAP-Debias". Namely, we will perform a MAP-Ridge all over again on the same data, but with only the features seleceted by the optimal MAP-Lassso model.
+
+Hence, we perform four different treatments with a linear model, that are
+
+1.**MAP-Ridge**
+2.**MAP-Lasso**
+3.**MAP-Debias**
+4.**Bayes_Ridge**
