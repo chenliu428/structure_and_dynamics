@@ -65,18 +65,20 @@ def Plot_Several_Training_Results(Results_Dict:dict, Features_Idexs_In:dict={}, 
     ax_risk.set_xlabel(r'$\tilde{\lambda}$', fontsize=15)
     ax_risk.set_title('Expected loss per data point '+Data_name, fontsize=15)
     ax_risk_zoom = fig_risk.add_axes([0.39,0.26,0.47,0.49])
+    ax_risk_zoom.set_title('zoom-in w/ log(x) scale')
     ax_risk_zoom.set_xlabel(r'$\tilde{\lambda}$')
-    ax_risk_zoom.set_xlim([4.1e-7,47])
-    ax_risk_zoom.set_ylim([0.233,0.246])
+    ax_risk_zoom.set_xlim([4.1e-7,100])
+    # ax_risk_zoom.set_ylim([0.233,0.246])
     ax_risk_zoom.set_xscale('log')
 
     fig_nll, ax_nll = plt.subplots()
     ax_nll.set_xlabel(r'$\tilde{\lambda}$', fontsize=15)
     ax_nll.set_title('Expected NLL '+Data_name, fontsize=15)
     ax_nll_zoom = fig_nll.add_axes([0.39,0.26,0.47,0.49])
+    ax_nll_zoom.set_title('zoom-in w/ log(x) scale')
     ax_nll_zoom.set_xlabel(r'$\tilde{\lambda}$')
-    ax_nll_zoom.set_xlim([4.1e-7,47])
-    ax_nll_zoom.set_ylim([0.68,0.71])
+    ax_nll_zoom.set_xlim([4.1e-7,100])
+    # ax_nll_zoom.set_ylim([0.68,0.71])
     ax_nll_zoom.set_xscale('log')
 
     fig_risk_nll_mix, ax_mix_risk = plt.subplots()
@@ -103,6 +105,12 @@ def Plot_Several_Training_Results(Results_Dict:dict, Features_Idexs_In:dict={}, 
         ax1.plot([xc, xc], [-1,10], 'k--', lw=0.4)
         ax2.plot([xc, xc], [-1,10], 'k--', lw=0.4)
 
+    ax_risk_zoom_ylim_min = 1e10
+    ax_risk_zoom_ylim_max = -1e10
+    ax_nll_zoom_ylim_min = 1e10
+    ax_nll_zoom_ylim_max = -1e10
+    ax_mix_ylim_min = 1e10
+    ax_mix_ylim_max = -1e10
     for key in Results_Dict.keys():
         Rslt = Results_Dict[key]
         
@@ -110,6 +118,11 @@ def Plot_Several_Training_Results(Results_Dict:dict, Features_Idexs_In:dict={}, 
         ax_risk_zoom.plot(Rslt['Panelty'], Rslt['Ave_Risk(panelty)'], Clrs[key]+Syms[key]+'--', ms=8, mfc='none', mew=1, lw=1, label=str(key))
         ax_nll.plot(Rslt['Panelty'], Rslt['Ave_Nll(panelty)'], Clrs[key]+Syms[key]+'--', ms=8, mfc='none', mew=1, lw=1, label=str(key))
         ax_nll_zoom.plot(Rslt['Panelty'], Rslt['Ave_Nll(panelty)'], Clrs[key]+Syms[key]+'--', ms=8, mfc='none', mew=1, lw=1, label=str(key))
+
+        ax_risk_zoom_ylim_max = max(ax_risk_zoom_ylim_max, np.max(Rslt['Ave_Risk(panelty)']))
+        ax_risk_zoom_ylim_min = min(ax_risk_zoom_ylim_min, np.min(Rslt['Ave_Risk(panelty)']))
+        ax_nll_zoom_ylim_max = max(ax_nll_zoom_ylim_max, np.max(Rslt['Ave_Nll(panelty)']))
+        ax_nll_zoom_ylim_min = min(ax_nll_zoom_ylim_min, np.min(Rslt['Ave_Nll(panelty)']))
 
         if key!='lasso':
             ax_mix_risk.plot(Rslt['Panelty'], Rslt['Ave_Risk(panelty)'], Clrs[key]+Syms[key]+'--', ms=8, mfc='none', mew=1, lw=1, label=str(key)+' risk')
@@ -123,6 +136,13 @@ def Plot_Several_Training_Results(Results_Dict:dict, Features_Idexs_In:dict={}, 
 
     ax_risk.legend(loc=2)    
     ax_nll.legend(loc=2)
+
+    ax_risk_zoom_ylim_min = ax_risk_zoom_ylim_min*0.95
+    ax_risk_zoom_ylim_max = ax_risk_zoom_ylim_max*1.0
+    ax_nll_zoom_ylim_min = ax_nll_zoom_ylim_min*0.95
+    ax_nll_zoom_ylim_max = ax_nll_zoom_ylim_max*1.0
+    ax_risk_zoom.set_ylim([ax_risk_zoom_ylim_min, ax_risk_zoom_ylim_max])
+    ax_nll_zoom.set_ylim([ax_nll_zoom_ylim_min, ax_nll_zoom_ylim_max])
 
     ax1.set_ylim([-0.064,0.067])
     ax2.set_ylim([4e-7,0.1])
@@ -334,7 +354,11 @@ def Plot_LinearRegressionResult_FromFile():
     
     ## Plots the Weights to compare ##
     # - prepare the figure structure - #
-    Fig, Axes = plt.subplots(3,3, sharex=True, figsize=(18,6))
+    Fig, Axes_raw = plt.subplots(3,len(dataset_names), sharex=True, figsize=(12,6))
+    if len(shape(Axes_raw))==2:
+        Axes = Axes_raw
+    else:
+        Axes = np.array([[ax_item] for ax_item in Axes_raw])
     Axs={}
     for i in range(len(dataset_names)):
         dname_key = dataset_names[i]
