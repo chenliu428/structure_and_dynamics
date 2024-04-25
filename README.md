@@ -41,6 +41,6 @@ For tuning hyper-parameters, a slight variation of the conventional cross valida
 
 ### Linear models
 
-A linear model for our problem reads 
-$$\mathbf{w} \cdot \mathbf{x}$$
+A linear model for our problem reads
+$$\hat{p} = \mathbf{w} \cdot \mathbf{x} + w_0 \;.$$
 There are various approaches based on a linear model
