@@ -45,7 +45,7 @@ For tuning hyper-parameters, a slight variation of the conventional cross valida
 
 A linear model for our problem reads
 $$p = x \cdot x + w_0$$
-$$ \hat{p} = \mathbf{w} \cdot \mathbf{x} + w_0 \quad . $$
+$$\hat{p} = \mathbf{w} \cdot \mathbf{x} + w_0 \quad .$$
 There are various approaches based on a linear model, such as empirical risk minimisation (ERM), maximum posterior (MAP) or Baysian inference.
 This project adopts a view in which different approaches can be regarded as variations of treatement of the same underlying probabilistic model, that is specified by a graphic representation.
 Adopting such an unified point of view has the advantage to compare across different treatments for the same dataset, and as such to assess the validation of treatments as well as the model assumption.
