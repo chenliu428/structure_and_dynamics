@@ -61,10 +61,10 @@ $$ P_\text{pr.} \propto \exp(-\lambda\ell_1(\mathbf{w})) \equiv \exp(-\lambda \s
 and
 $$ P_\text{pr.} \propto \exp(-\lambda\ell_2(\mathbf{w})) \equiv \exp(-\lambda \sum_{\alpha}w_\alpha^2 ) \quad .$$
 One easily sees that, with either prior choice, MAP and ERM (equiped with a $\ell_1$ or $\ell_2$ regularisation) become equivalent in this setting and the training results only depends on $` \tilde{\lambda}\equiv \lambda/\beta `$.
-Conventionally, it is called Lasso regression when appplying MAP with a $\ell_1$ regularisation and Ridge regression when applying MAP with a $\ell_2$ regularisation. 
+Conventionally, it is called Lasso regression when appplying MAP with a $\ell_1$ regularisation and Ridge regression when applying MAP with a $\ell_2$ regularisation.
 We will call them "MAP-Ridge" and "MAP-Lasso" to be distinguished from Bayesian treatment of the same probabilistic models, which will be called "Bayes-Ridge" for example.
 "Bayes-Lasso" is not studied here, because of the numerical integration challenges raised by our particular dataset.
-In Bayes-Ridge, hyper-parameters ($\beta$ and $\lambda$) are determined by maximising the marginal likelihood (also called "model evidence"), in which, after short manipulation, the training results can also be considered to only depend on $\tilde{\lambda}$. 
+In Bayes-Ridge, hyper-parameters ($\beta$ and $\lambda$) are determined by maximising the marginal likelihood (also called "model evidence"), in which, after short manipulation, the training results can also be considered to only depend on $\tilde{\lambda}$.
 
 MAP-Lasso is known for its sparsity in training results, which is particularly useful for selecting relevant features, such as one of the core purposes of this project. It is however also known for its tendency to over reduce the amplitude of the selected weights. To address this issue, we introduces also the debias treatment, called "MAP-Debias". Namely, we will perform a MAP-Ridge all over again on the same data, but with only the features seleceted by the optimal MAP-Lassso model.
 
@@ -75,7 +75,39 @@ Hence, we perform four different treatments with a linear model, that are
 3. **MAP-Debias**
 4. **Bayes-Ridge**
 
+MAP training and results plotting are realised by runing the script [GaussianLH_Panelty_RidgeLasso_MAP.py](./project/PyCode/GaussianLH_Panelty_RidgeLasso_MAP.py), and Bayesian training is realised by [GaussianLH_Panelty_Ridge_Bayes.py](./project/PyCode/GaussianLH_Panelty_Ridge_Bayes.py). See [explain.ipynb](./project/DATA/) for more information.
+
+#### Results of linear regression
+
+The expected loss (or risk, or negative log likelihood(nll)) from MAP treatments (MAP-ridge, MAP-lasso and MAP-debias) are exibited as a function of $\tilde\lambda$ in [Fig2](README.md#fig2), and the marginal likelihood from the Bayesian treatment is shown in [Fig3]
+
+#### Fig.2
+<picture>
+    <img
+        src="./pics/MAP_risk1.png"
+        height="400"
+        width="500"
+    />
+    <img
+        src="./pics/MAP_risk2.png"
+        height="400"
+        width="500"
+    />
+</picture>
+<p>
+    <em> Left: The expected loss (per data point) as a function of the penalty strength, for all MAP treatments. Right: The expected loss of MAP-debias and MAP-ridge zoomed in at their minima, together with their negative log likelihood.</em>
+</p>
+
+#### Fig.3
+<picture>
+    <img
+        src="./pics/BAY_risk.png"
+        height="400"
+        width="500"
+    />
+</picture>
 
 
+When the regularisation takes the $\ell_2$ form, the model training, either in MAP or Bayesian treatment, can be solved by numerically inversing the so-called observation matrix constructed from the training data. When Lasso regression is concerned, gradient descent is used for training. More details of the method are expalined in [explain.ipynb](./project/explain.ipynb).
 
-The expected loss (or risk, or negative log likelihood(nll)) for each of above treatment are exibited as a function of $\tilde\lambda$ to tune the hype
+
