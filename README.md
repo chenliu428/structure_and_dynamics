@@ -88,6 +88,8 @@ The expected loss (or risk, or negative log likelihood(nll)) from MAP treatments
         height="400"
         width="500"
     />
+</picture>
+<picture>
     <img
         src="./pics/MAP_risk2.png"
         height="400"
