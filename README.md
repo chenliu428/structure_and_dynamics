@@ -225,7 +225,10 @@ To evaluate the performance of all our approaches, we calculate the "Pearson" nu
 <!-- $$C_P \equiv \frac{\frac{1}{N'}\sum_{i=1}^{N'} (\hat{p}_i - \overline{\hat{p}})(p_i - \overline{p})}{\overline{p^2}-\overline{p}^2}$$ -->
 $$C_P\equiv \frac{1}{N'}\sum_{i=1}^{N'} (\hat{p}_i - \overline{\hat{p}})(p_i - \overline{p})\bigg/(\overline{p^2}-\overline{p}^2)$$
 with
-$$\overline{\hat{p}}=\frac{1}{N'}\sum_i^{N'} \hat{p} _i \quad \text{,}\quad \overline{p}=\frac{1}{N'}\sum_i^{N'} p _i \quad \text{and} \quad \overline{p^2} = \frac{1}{N'}\sum_{i}^{N'} p_i^2$$
+$$\overline{\hat{p}}=\frac{1}{N'}\sum_i^{N'} \hat{p} _i$$
+$$\overline{p}=\frac{1}{N'}\sum_i^{N'} p _i$$
+and
+$$\overline{p^2} = \frac{1}{N'}\sum_{i}^{N'} p_i^2$$
 A perfect prediction makes $C_P=1$ and a bad prediction renders $C_P$ close to zero (positiv or negative).
 
 The Pearson number presented in [Fig.8](./README.md#fig8) is however computed by averaging over several random selections of a portion of the entire dataset used for model training (due to the lack of extra data). Hence, the Pearson number shown here are only rough suggestion of their real performance. All models perform more or less the same without significant variation.
