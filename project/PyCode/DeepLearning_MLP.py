@@ -554,14 +554,14 @@ def main_FullyFunctional_MLP_SaveToFile(post_in_arch:list, Cnf_name:str='Cnf2.xy
     str_arch = 'Arch_In.'
     for idx, n in enumerate(arch):
         str_arch=str_arch+'-'*(idx!=0)+f'{n:d}'
-    dr.save_to_file_a_dictrionary('./DATA/Results_data/'+Cnf_name+'_Deep_'+str_arch+'_Dict', R_dict_save)
+    # dr.save_to_file_a_dictrionary('./DATA/Results_data/'+Cnf_name+'_Deep_'+str_arch+'_Dict', R_dict_save)
 
 
 if __name__ =='__main__':
     print('DeepLearning_MLP.py')
     # sys.exit()
 
-    main_FullyFunctional_MLP_SaveToFile(post_in_arch=[2,1], Cnf_name='Cnf2.xy')
+    main_FullyFunctional_MLP_SaveToFile(post_in_arch=[2,5,5,1], Cnf_name='Cnf2.xy')
     sys.exit()
 
     # main_FullyFunctional_MLP()    

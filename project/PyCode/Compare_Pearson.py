@@ -212,9 +212,40 @@ if __name__=='__main__':
     pearson_vlu = list(Pearson_Coeff['mean'].values())
     pearson_err = list(Pearson_Coeff['std'].values())
     
+    ### plot pearson comparison ###
     fig = plt.figure(figsize=(6,6))
     ax = fig.add_axes([0.15, 0.25, 0.8, 0.7])
     fig.suptitle(f'Pearson Coefficients')
     ax.errorbar(xtick_labels, pearson_vlu, yerr=pearson_err, fmt='d', mfc='none', ms=15, mew=1, elinewidth=1, capsize=12, color='r')
     for label in ax.get_xticklabels(which='major'):
         label.set(rotation=30, horizontalalignment='right')
+
+    ### plot MLP input layer coefficients ###
+
+    AvAbsInCoefs={}
+    for i, mthd_ky in enumerate(class_mlp):
+        state_dict_list = model_dicts[mthd_ky]['valid_slct_parameters']
+        Abs_InCoef_AvTrials = []
+        for j, a_state_dict in enumerate(state_dict_list):
+            In_Coef_tensor = list(a_state_dict.items())[0][1]
+            n_hd, n_in = In_Coef_tensor.shape
+            In_Coef = np.copy(In_Coef_tensor.detach().numpy())
+            Av_Coef = np.mean(In_Coef, axis=0)
+            Av_Abs_Coef = np.mean(np.abs(In_Coef), axis=0)
+            Max_Coef = np.max(In_Coef, axis=0)
+            Min_Coef = np.min(In_Coef, axis=0)
+            
+            Abs_InCoef_AvTrials.append(Av_Abs_Coef)
+        
+        Abs_InCoef_AvTrials = np.mean(np.array(Abs_InCoef_AvTrials), axis=0)
+        AvAbsInCoefs[mthd_ky] = Abs_InCoef_AvTrials
+    
+    fig_w, ax_w  = plt.subplots(1,1, figsize=(12,6))
+    fig_w.suptitle('MLP Avrg. Abs. Input Coeff.')
+    clrs = cm.gnuplot(np.linspace(0,1, len(class_mlp)))
+    symb = ['o', 's', 'x', 'd', '+', ]
+    for i, ky in enumerate(class_mlp):
+        ax_w.plot(AvAbsInCoefs[ky], symb[i]+'--', lw=1, ms=9, mew=1, mfc='none', color=clrs[i], label=ky)
+    ax_w.legend(loc='best')
+    ax_w.set_xlabel(r'feature index $\alpha$')
+    ax_w.set_ylabel(r'$<|w_\alpha|>$', rotation=0)

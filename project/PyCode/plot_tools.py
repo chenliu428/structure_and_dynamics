@@ -460,7 +460,7 @@ def Plot_LinearRegressionResult_FromFile():
         ax3.set_yscale('log')
 
     ## set legends ##
-    Fig.legend(lines, handles, loc='lower center')
+    Fig.legend(lines, handles, loc='lower right')
     for key in Axs_Apps.keys():
         Axs_Apps[key].legend()
 

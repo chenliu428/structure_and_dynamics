@@ -59,7 +59,7 @@ $$P_\text{lh.} \propto \exp\left( -\frac{1}{2}\beta(p_i-\hat{p})^2 \right)$$
 which is equivalent to considering a summed square loss function. We will consider two types of prior on the feature weights $` \mathbf{w} `$, namely a $\ell_1$ norm and a $\ell_2$ norm, that is
 $$P_\text{pr.} \propto \exp(-\lambda\ell_1(\mathbf{w})) \equiv \exp(-\lambda \sum_{\alpha}|w_\alpha| )$$
 and
-$$P_\text{pr.} \propto \exp(-\lambda\ell_2(\mathbf{w})) \equiv \exp(-\lambda \sum_{\alpha}w_\alpha^2 ) \quad .$$
+$$P_\text{pr.} \propto \exp(-\lambda\ell_2(\mathbf{w})) \equiv \exp(-\frac{\lambda}{2} \sum_{\alpha}w_\alpha^2 ) \quad .$$
 One easily sees that, with either prior choice, MAP and ERM (equiped with a $\ell_1$ or $\ell_2$ regularisation) become equivalent in this setting and the training results only depends on $` \tilde{\lambda}\equiv \lambda/\beta `$.
 Conventionally, it is called Lasso regression when appplying MAP with a $\ell_1$ regularisation and Ridge regression when applying MAP with a $\ell_2$ regularisation.
 We will call them "MAP-Ridge" and "MAP-Lasso" to be distinguished from Bayesian treatment of the same probabilistic models, which will be called "Bayes-Ridge" for example.
@@ -77,9 +77,11 @@ Hence, we perform four different treatments with a linear model, that are
 
 MAP training and results plotting are realised by runing the script [GaussianLH_Panelty_RidgeLasso_MAP.py](./project/PyCode/GaussianLH_Panelty_RidgeLasso_MAP.py), and Bayesian training is realised by [GaussianLH_Panelty_Ridge_Bayes.py](./project/PyCode/GaussianLH_Panelty_Ridge_Bayes.py). See [explain.ipynb](./project/DATA/) for more information.
 
+When the regularisation takes the $\ell_2$ form, the model training, either in MAP or Bayesian treatment, can be solved by numerically inversing the so-called observation matrix constructed from the training data. When Lasso regression is concerned, gradient descent is used for training. More details of the method are expalined in [explain.ipynb](./project/explain.ipynb).
+
 #### Results of linear regression
 
-The expected loss (or risk, or negative log likelihood(nll)) from MAP treatments (MAP-ridge, MAP-lasso and MAP-debias) are exibited as a function of $\tilde\lambda$ in [Fig2](README.md#fig2), and the marginal likelihood from the Bayesian treatment is shown in [Fig3]
+The expected loss (or risk, or negative log likelihood(nll)) from MAP treatments (MAP-ridge, MAP-lasso and MAP-debias) are exibited as a function of $\tilde\lambda$ in [Fig2](README.md#fig2), and the marginal likelihood from the Bayesian treatment is shown in [Fig3](./README.md#fig3)
 
 #### Fig.2
 <picture>
@@ -96,9 +98,11 @@ The expected loss (or risk, or negative log likelihood(nll)) from MAP treatments
         width="500"
     />
 </picture>
-<p>
-    <em> Left: The expected loss (per data point) as a function of the penalty strength, for all MAP treatments. Right: The expected loss of MAP-debias and MAP-ridge zoomed in at their minima, together with their negative log likelihood.</em>
-</p>
+
+> *Left: The expected loss (per data point) as a function of the penalty strength, for all MAP treatments. Right: The expected loss of MAP-debias and MAP-ridge zoomed in at their minima, together with their negative log likelihood (nll).*
+<!-- <p>
+    <em> Left: The expected loss (per data point) as a function of the penalty strength, for all MAP treatments. Right: The expected loss of MAP-debias and MAP-ridge zoomed in at their minima, together with their negative log likelihood (nll).</em>
+</p> -->
 
 #### Fig.3
 <picture>
@@ -109,7 +113,49 @@ The expected loss (or risk, or negative log likelihood(nll)) from MAP treatments
     />
 </picture>
 
+> *The marginal likelihood (model evidence) as a function of the penalty strength. Different trials for inspectig the sensibility of the training result to the fluctuations of the training set by randomly selecting a portion of the entire dataset. The "all_data" result comes from training on the entire dataset.*
+<!-- <p>
+    <em> The marginal likelihood (model evidence) as a function of the penalty strength. Different trials for inspectig the sensibility of the training result to the fluctuations of the training set by randomly selecting a portion of the entire dataset. The "all_data" result comes from training on the entire dataset. </em>
+</p> -->
 
-When the regularisation takes the $\ell_2$ form, the model training, either in MAP or Bayesian treatment, can be solved by numerically inversing the so-called observation matrix constructed from the training data. When Lasso regression is concerned, gradient descent is used for training. More details of the method are expalined in [explain.ipynb](./project/explain.ipynb).
+With respect to the loss or model evidience versus penalty:
 
+- Firstly, we notice that a minimum of the loss is not yet found for MAP-Debias due to a slow convergence for small values of the penalty $\tilde\lambda$. Nonetheless, it is strongly suggested a minimum exists from where the red curve stops down to zero, since the zero penalty limit is the same for MAP-ridge and MAP-lasso and the MAP-ridge does show a high loss at zero penalty limit (Fig.2).
+- Secondly, the MAP-debias based on the so-far best found MAP-lasso significantly outperforms the MAP-ridge at the optimal penalty, and more intriguingly has a much lower loss at the zero penalty limit. These two facts suggest that MAP-ridge indeed overfits the data by taking into account of all input features.
+- The Bayes-ridge treatment has little sensibility to the data fluctuations for the dataset size we are using. The optimal penalty value is about the same order of magnitude of (actually slightly larger than) that of MAP-ridge, which is a sign of consistency.
+
+Now, we compare the feature weights at the optimal penalty value from different approaches. When Bayes-ridge is concerned, the posterior of feature weights is given by a Gaussian distribution, for which we shall invoke the mean values $` \mathbf{m} `$ and the covariance matrix $` \mathbf{C} `$.
+
+#### Fig.4
+<picture>
+    <img
+        src="./pics/LM_ws_Compare.png"
+        height="720"
+        width="980"
+    />
+</picture>
+
+> *Top: Comparison of weights of all MAP treatments. Vertical dashied lines indicate the features selected by the MAP-lasso and used by MAP-debias. Middle: Comparison between MAP-ridge and Bayes-ridge. Void boxes and vertical dashed lines indicate the effective features selected by the Bayes-ridge. Bottom: Comparison between MAP-ridge and Bayes-ridge in the absolute value*
+<!-- <p>
+    <em>Top: Comparison of weights of all MAP treatments. Middle: Comparison between MAP-ridge and Bayes-ridge. Void boxes indicates the effective parameters selected by the Bayes-ridge. Bottom: Comparison between MAP-ridge and Bayes-ridge in the absolute value.</em>
+</p> -->
+
+With respect to the weight comparison, shown in [Fig.4](./README.md#fig4):
+
+- Firstly, MAP-Lasso compared with MAP-ridge, has eliminate a majority of the input features (structure descriptors) for their relevance to the propensity. MAP-debias fine tunes the weights associated to those selected features.
+- MAP-ridge and Bayes-ridge are largely consistent, especially on features of very small weight and of most significant weights.
+- Bayesian-ridge approach gives an effective number of features that characterises the actually complexity of the trained model. This number is given by $` \gamma = \lambda (\mathbf{m}\cdot\mathbf{m}) `$. The $\gamma$ features with the largest weight in their absolute vales can then be thought as the features selected by the Bayesian treatment. Thses selected effeictive features are also indicated in [Fig.4](./README.md#fig4).
+- Comparing features selected by MAP-Lasso and those by Bayes-ridge, one notices a fair overlap ratio 10/19 for Bayes-ridge and a overlap 10/23 for MAP-lasso. One interpretation can be that those commonly selected features might be actually relevant to propensity. This interpretation is actually supported by training neuron networks, from which features between index 40 to 50 are largely suppressed.
+- Finally the covariance matrix fo Bayes-ridge is shown in [Fig.5](./README.md#fig5). Feature weights mostly uncorrelated and very narrowly distributed, excpet some negtive correlation among features indexed in bewteen 40 to 60. This says bascially that if one, for any reason, wants to tune up some weights associated with features in that range, she has to tune down some others to make the prediction equally good. This may has something to do with the fact that MAP-lasso picks some different groups of feartures than that picked by Bayes-ridge, and may indicate some non-trivial physical information about those features, worth further investigation.  
+
+#### Fig.5
+<picture>
+    <img
+        src="./pics/BAY_cov.png"
+        height="400"
+        width="500"
+    />
+</picture>
+
+> *Covariance matrix of the wieght posterior from Bayes-ridge*
 
