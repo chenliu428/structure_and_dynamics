@@ -33,7 +33,7 @@ The strong link between a configuration and the propensity, as evidenced by nume
 Finally, it is worth emphasizing that whenever we callibrate a model against some data, the actual objective is to optimise the model with respect to certrain distribution underlying that dataset, to obtain a good generalisation for unseen data. Unlike most of real life problem,  for the physical purpose of our problem, the underlying probabilty distribution is theoretically known. Formally, it is the one particle Gibbs-Boltzman weight over the $M$ structure descriptors and the propensity $p$, denoted $` P_\text{GB}(\mathbf{x},p) `$.
 This remark suggests us the correct way to use the available dataset to calibrate our models, instead of blindly treating each input-output pair as an independent data point. In other paragraphs of this presentation, the input-output pairs are carefully selected from the raw dataset, so that in either training or validation set, data points can be regarded as independently generated from the Gibbs-Boltzman weight.
 
-## Machine Learning models \& Training Algorithms
+## Machine Learning models \& Training Algorithms \& Results
 
 After preprocessing the raw data, we end up with in total $N\approx 500$ data points that can be regarded as independently generated from some underlying probability distribution (see [problem context](/README.md#problem-context) for details). Each data point is composed by a input vector $` \mathbf{x} `$ of dimension $M=96$ and a output scalar $p$. This entire dataset will be sparated into training set and validation set for training models and hyper-parameter selection.
 
@@ -49,7 +49,7 @@ There are various approaches based on a linear model, such as empirical risk min
 This project adopts a view in which different approaches can be regarded as variations of treatement of the same underlying probabilistic model, that is specified by a graphic representation.
 Adopting such an unified point of view has the advantage to compare across different treatments for the same dataset, and as such to assess the validation of treatments as well as the model assumption.
 This advantage does come with a price, which requires that the exponential of the negative loss function used in an ERM is normalisable with respect to target value. For example, the absolut distance $`|p_i-\hat{p}|`$ renders $`\int dp_i \exp(-|p_i-\hat{p}|)`$ normalisable.
-This constraint may hurt the application in some cases but not ours.
+This constraint may appear inconvenient in some cases but not ours.
 
 #### Different treatments
 
@@ -159,3 +159,94 @@ With respect to the weight comparison, shown in [Fig.4](./README.md#fig4):
 
 > *Covariance matrix of the wieght posterior from Bayes-ridge*
 
+### Neuron Network (Multi-Layer Perceptrons)
+
+#### Architecture \& Training algorithm
+
+The structure of the neuron network is multi-layer perceptrons (MLP), with a input layer of $M$ nodes, an output layer of a single node, and at least one hidden layer with multiple nodes.
+The activation function on hidden layer nodes are leaky ReLU function $f(x)$ with a slope equal to $0.1$ for negative $x$ and a slope $1$ for positive $x$. There is no activation function on the output node, i.e. the output is simpley a linear combination of the last hidden layer. At each passage between successive layers, a bias vector is added.
+
+We consider also a summed square loss function, which is equivalent to a probabilistic model with the same likelihood mentioned above but with a completely non-informative prior, i.e. a constant distribution over the weights on each passages. The control of overfitting is then implemented in the stopping criterion in the gradient descent training procedure.
+
+We used the Adam optimiser and feed the model with small random batches of data to realise a stochastic gradient descent trainig algorithm. To prevent overfitting, an early stop criterion is implemented as following. For a given architecture of the MLP, we train the model with several trials of the cross validation, where data in each trial is prepared as mentioned [above](./README.md#architecture--training-algorithm). In each trial, the MLP is trained with stochastic gradient descent method against the training set, while at each step the validation loss is also monitored. At each update, a lag is computed as the different between the current step and the step where the smallest validation loss has ever been achieved so far. The training stops whenever the lag reaches a threshold that is reasonably chosen. The resulting trained model is the one that previously has given the smallest validation loss.
+There is also a wall-time, where the training stops no matter what, in which case, it is also the so-far reached smallest validation loss indicates the training result.
+
+MLP model definition and traing are realised by the script [DeepLearning_MLP.py](./project/PyCode/DeepLearning_MLP.py). By running this program, it will plots also the loss monitoring during the entire training process which typically looks like [Fig.6](./README.md#fig6)
+
+#### Fig.6
+
+<picture>
+    <img
+        src="./pics/MLP_ErrTrainEvo.png"
+        height="400"
+        width="500"
+    />
+</picture>
+
+> *Training and validation errors as a fucntion of the step of updating, together with their moving averages.*
+
+Four architectures with increasing complexity (or flexibitly) have heen tested, which are:
+
+| Input |  Hidden | Output|
+|-------|---------|-------|
+|  $M$=96  |    2    |   1   |
+|  $M$=96  |   5-5   |   1   |
+|  $M$=96  |  10-10  |   1   |
+|  $M$=96  | 2-10-10 |   1   |
+
+The "96-2-1" architecture is the simplest MLP that is more complex than a linear model. Then the two architectures with two hidden layers are chosen to gradually increase the model complexity. The last one with three hidden layers, among which a "bottle-neck" of two nodes right after the input layer, has been shown to perform well in predicting propensity given a structure in a [recent study](https://journals.aps.org/prl/abstract/10.1103/PhysRevLett.130.238202) using a different set of measurements.
+
+#### Results of MLP
+
+Although the post-trianing MLP models lack interpretability, we can at least infer whether a given feature is irrelevant by looking at the absolut value of the weights associated to that feature at the first passage from the input layer to the first hidden layer. Formally, for a feature indexed $\alpha$, one can compute its "importance" by
+$$I_\alpha \equiv \frac{1}{M_{h_1}}\sum_{\beta=1}^{M_{h_1}} |w_{\beta,\alpha}|$$
+where $M_{h_1}$ represents the number of nodes on the first hidden layer and $w_{\beta,\alpha}$ the weight linking the $\alpha$-th feature and the $\beta$-th node of the first hidden layer.
+If this number $I_\alpha$ is small, we can be sure that it plays very little role in determining the target propensity, as its influence is killed right after the input layer. However if it is relatively large number, we can not be sure it is actually relevant, as its influence could be eventually cancelled out after a series of linear and non-linear transformations.
+
+The importance indexes from the four architectures studied are presented in [Fig.7](./README.md#fig7). Interestingly, it can be concluded that features indexed from 40 to around 50 are almost irrelevant in a trained MLP model in predicting the propensity, which is against the insights of MAP-lasso feature selection, but somewhat inline with Bayes-ridge.
+
+#### Fig.7
+
+<picture>
+    <img
+        src="./pics/MLP_InWs.png"
+        height="400"
+        width="900"
+    />
+</picture>
+
+> *Training and validation errors as a fucntion of the step of updating, together with their moving averages.*
+
+Given that MLP is an universal approximator, meaning that it has less systematic bias rised by the specific form of a model such as the linear model, one might conclude that the features selected by MAP-Lasso but dropped by MLP are actually due to the systematic bias of the Lasso regression model. This idea is also inline with the previous consideration that the overlap of feature selections between MAP-lasso and Bayes-ridge could be actually relevant.
+
+## Final Discussions
+
+To evaluate the performance of all our approaches, we calculate the "Pearson" number using a trained model applied on an unseen dataset, which, in our case, needs to be an entire list of strcture descriptors and the corresponding propensities. Letting $` \hat{p}_i `$ be the propensity predicted by a model using the input $` \mathbf{x}_i `$ in the new dataset, the Pearson number is defined as
+$$C_P \equiv \frac{\frac{1}{N'}\sum_{i=1}^{N'} (\hat{p}_i - \overline{\hat{p}})(p_i - \overline{p})}{\overline{p^2}-\overline{p}^2}\quad\text{with}\quad \overline{\hat{p}}=\frac{1}{N'}\sum_i^{N'} \hat{p} _i \quad \text{,}\quad \overline{p}=\frac{1}{N'}\sum_i^{N'} p _i \quad \text{and} \quad \overline{p^2} = \frac{1}{N'}\sum_{i}^{N'} p_i^2$$
+A perfect prediction makes $C_P=1$ and a bad prediction renders $C_P$ close to zero (positiv or negative).
+
+The Pearson number presented in [Fig.8](./README.md#fig8) is however computed by averaging over several random selections of a portion of the entire dataset used for model training (due to the lack of extra data). Hence, the Pearson number shown here are only rough suggestion of their real performance. All models perform more or less the same without significant variation.
+
+#### Fig.8
+
+<picture>
+    <img
+        src="./pics/Pearson.png"
+        height="400"
+        width="400"
+    />
+</picture>
+
+> *Performance evaluation of all models using Pearson number.*
+
+Here are some remarks with respect to the performance evaluation using Pearson number:
+
+- Within the scope of this work, the linear regression does a decent job already compared to universal approximators. If one were to draw any physical insights from this work, the linear regression is better tool than MLP.
+
+- Varying architecture of the MLP neuron network (within the scope here) does not increase significantly the performance, suggesting that the maximum predictibility of the propensity from the structure using the scheme assumed in this work is bounded at a level quantified by $C_P \approx  0.7$. But it should be emphasized the upper bound estimation is obtained by using a limited number of possible loss functions and regularisations. One may actually use a summed absolute loss or even the Pearson number itself as a loss function, which may results in better performance, see for example a [recent study](https://journals.aps.org/prl/abstract/10.1103/PhysRevLett.130.238202).
+
+- Now, assuming there exist a almost perfect target function marking very high, say 0.95, in Pearson number, what can we say about our so-far realised approaches. Since all our models reaches around 0.7 in Pearson number, each model must captures some properties of the target function and each compromise their performance by either losing some information or disturbing with noise signals, i.e. overfitting. Hence, with respect to the discrepancy in feature selection and comparable levels of performance between approaches:
+    - The features seleced by MAP-Lasso but dropped off by Bayes-ridge and MLP, are very likely to be irrelevant, for 1. MLP makes it clear that even without those features, one can still predict the propensity equally well when taking them into account by using the Debias model. 2. The weight associated  with those features in MAP-Debias is actually relatively small compared with others, meaning that even taking them into account, they have little influences on the outcome.
+    - It is rather unlikely the features dropped by MLP are information lost. The MLP model is more likely to capture some non-linear details of the functional form of the target function compared to a linear model, and at the same time consistently suppresses those features regardless the architecture.
+
+To conclude, with this mini-project, we have identified a scope of possibly relevant structure descriptors, i.e. the union of selected features by all methods. Within this collection, the mismatch among different treatments defines a gourp of features that is probably due to overfitting, and the consistent choices may identify indeed the relevant ones. To clarify this issue, more detailed analysis needs to be such as experimenting models without those questionable features. 
