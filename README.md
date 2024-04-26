@@ -222,7 +222,8 @@ Given that MLP is an universal approximator, meaning that it has less systematic
 ## Final Discussions
 
 To evaluate the performance of all our approaches, we calculate the "Pearson" number using a trained model applied on an unseen dataset, which, in our case, needs to be an entire list of strcture descriptors and the corresponding propensities. Letting $` \hat{p}_i `$ be the propensity predicted by a model using the input $` \mathbf{x}_i `$ in the new dataset, the Pearson number is defined as
-$$C_P \equiv \frac{\frac{1}{N'}\sum_{i=1}^{N'} (\hat{p}_i - \overline{\hat{p}})(p_i - \overline{p})}{\overline{p^2}-\overline{p}^2}$$
+<!-- $$C_P \equiv \frac{\frac{1}{N'}\sum_{i=1}^{N'} (\hat{p}_i - \overline{\hat{p}})(p_i - \overline{p})}{\overline{p^2}-\overline{p}^2}$$ -->
+$$C_P\equiv \frac{1}{N'}\sum_{i=1}^{N'} (\hat{p}_i - \overline{\hat{p}})(p_i - \overline{p})\bigg/(\overline{p^2}-\overline{p}^2)$$
 with
 $$\overline{\hat{p}}=\frac{1}{N'}\sum_i^{N'} \hat{p} _i \quad \text{,}\quad \overline{p}=\frac{1}{N'}\sum_i^{N'} p _i \quad \text{and} \quad \overline{p^2} = \frac{1}{N'}\sum_{i}^{N'} p_i^2$$
 A perfect prediction makes $C_P=1$ and a bad prediction renders $C_P$ close to zero (positiv or negative).
